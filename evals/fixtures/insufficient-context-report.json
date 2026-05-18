@@ -1,0 +1,10 @@
+{
+  "schemaVersion": "1.2",
+  "facts": [],
+  "whatToDo": [
+    "Provide a GitHub issue URL or owner, repo, and issue number.",
+    "Paste the issue body if the issue is private.",
+    "Add a focus path if the failure appears isolated to one package."
+  ],
+  "draftMaintainerComment": "I do not have enough repository context to cite observed facts yet. Please provide an issue URL or the owner, repo, and issue number so I can inspect read-only GitHub sources."
+}

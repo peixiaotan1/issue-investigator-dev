@@ -1,0 +1,23 @@
+{
+  "schemaVersion": "1.2",
+  "facts": [
+    {
+      "text": "The issue is open and labeled as a bug.",
+      "sourceType": "issue",
+      "sourceLabel": "Issue #123",
+      "sourceUrl": "https://github.com/example/project/issues/123"
+    },
+    {
+      "text": "The reported stack trace points at the request handler.",
+      "sourceType": "file",
+      "sourceLabel": "app/api/investigate/route.ts",
+      "sourceUrl": "https://github.com/example/project/blob/main/app/api/investigate/route.ts"
+    }
+  ],
+  "whatToDo": [
+    "Reproduce the request with the issue payload.",
+    "Add a regression test around the route handler.",
+    "Check whether the failing path changed recently."
+  ],
+  "draftMaintainerComment": "Thanks for the report. The issue is open and labeled as a bug, and the stack trace points at app/api/investigate/route.ts. I would start by reproducing the request payload and adding a regression test around that route."
+}

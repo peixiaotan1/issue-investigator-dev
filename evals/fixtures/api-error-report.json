@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "1.2",
+  "facts": [
+    {
+      "text": "GitHub returned a permission or rate-limit error while reading repository data.",
+      "sourceType": "api_error",
+      "sourceLabel": "GitHub API 403",
+      "sourceUrl": ""
+    }
+  ],
+  "whatToDo": [
+    "Confirm the OAuth token can read the target repository.",
+    "Retry after the GitHub API rate limit resets.",
+    "Use a narrower public issue if private repository access is unavailable."
+  ],
+  "draftMaintainerComment": "I could not verify repository facts because GitHub returned a permission or rate-limit error. Please confirm the token can read this repository or retry after the rate limit resets."
+}

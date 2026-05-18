@@ -48,8 +48,9 @@ export async function POST(request: Request) {
   const tools = createInvestigationTools(octokit);
 
   const openai = getOpenAIProvider();
+  const modelName = process.env.OPENAI_MODEL ?? "gpt-4o-mini";
   const result = streamText({
-    model: openai(process.env.OPENAI_MODEL ?? "gpt-4o-mini"),
+    model: openai.chat(modelName),
     system: createInvestigationSystemPrompt(context),
     messages: await convertToModelMessages(messages),
     tools,
