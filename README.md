@@ -91,6 +91,7 @@ Fill values:
 - `NEXTAUTH_URL` such as `http://localhost:3000`
 - `GITHUB_CLIENT_ID`
 - `GITHUB_CLIENT_SECRET`
+- `GITHUB_MARKETPLACE_WEBHOOK_SECRET` for GitHub Marketplace webhook verification
 - `OPENAI_API_KEY`
 - `OPENAI_BASE_URL` optional OpenAI-compatible root, without `/chat/completions`
 - `OPENAI_MODEL` optional, defaults to `gpt-4o-mini`
@@ -154,6 +155,21 @@ https://your-render-service.onrender.com/api/auth/callback/github
 ```
 
 Redeploy after updating those values, then verify `/api/health`, GitHub login, `/api/llm-test`, and one investigation flow.
+
+## GitHub Marketplace Webhook
+
+Use this endpoint for the Marketplace listing webhook:
+
+```txt
+https://your-render-service.onrender.com/api/github-marketplace-webhook
+```
+
+Recommended settings:
+
+- Content type: `application/json`
+- Secret: a random long string also configured as `GITHUB_MARKETPLACE_WEBHOOK_SECRET`
+
+The endpoint verifies GitHub's `X-Hub-Signature-256` HMAC signature and returns `200` for valid deliveries. It currently acknowledges Marketplace events without storing or mutating data.
 
 ## Security Notes
 
