@@ -10,6 +10,7 @@ import {
   type EvidenceFact,
   type InvestigationReport,
 } from "@/lib/agent/investigation-report-schema";
+import { parseIssueUrl } from "@/lib/github/parse-issue-url";
 
 function getVisibleText(parts: Array<{ type: string; text?: string }>) {
   return parts
@@ -144,8 +145,18 @@ function buildInvestigationPrompt(input: {
 Please investigate this issue and provide facts, what to do, and a draft maintainer comment.`;
 }
 
+function getIssueUrlError(issueUrl: string) {
+  const trimmedIssueUrl = issueUrl.trim();
+  if (!trimmedIssueUrl || parseIssueUrl(trimmedIssueUrl)) {
+    return "";
+  }
+
+  return "Enter a valid GitHub issue URL like https://github.com/owner/repo/issues/123.";
+}
+
 export function InvestigationConsole() {
   const [issueUrl, setIssueUrl] = useState("");
+  const [issueUrlError, setIssueUrlError] = useState("");
   const [owner, setOwner] = useState("");
   const [repo, setRepo] = useState("");
   const [issueNumber, setIssueNumber] = useState("");
@@ -198,8 +209,15 @@ export function InvestigationConsole() {
     <div className="grid gap-6 lg:grid-cols-[390px_minmax(0,1fr)]">
       <form
         className="space-y-5 rounded-2xl border bg-card p-6 shadow-sm lg:sticky lg:top-6 lg:self-start"
+        noValidate
         onSubmit={(event) => {
           event.preventDefault();
+          const nextIssueUrlError = getIssueUrlError(issueUrl);
+          setIssueUrlError(nextIssueUrlError);
+          if (nextIssueUrlError) {
+            return;
+          }
+
           const prompt = buildInvestigationPrompt({
             issueUrl,
             owner,
@@ -223,11 +241,29 @@ export function InvestigationConsole() {
         <label className="block space-y-1.5 text-sm">
           <span className="font-medium">Issue URL</span>
           <input
-            className="w-full rounded-lg border bg-background px-3 py-2.5 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/40"
+            className="w-full rounded-lg border bg-background px-3 py-2.5 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/40 aria-invalid:border-destructive aria-invalid:ring-destructive/20"
+            type="url"
             placeholder="https://github.com/owner/repo/issues/123"
             value={issueUrl}
-            onChange={(event) => setIssueUrl(event.target.value)}
+            aria-invalid={Boolean(issueUrlError)}
+            aria-describedby={issueUrlError ? "issue-url-error" : undefined}
+            onChange={(event) => {
+              const nextIssueUrl = event.target.value;
+              setIssueUrl(nextIssueUrl);
+              if (issueUrlError) {
+                setIssueUrlError(getIssueUrlError(nextIssueUrl));
+              }
+            }}
           />
+          {issueUrlError ? (
+            <span
+              id="issue-url-error"
+              className="block text-xs leading-5 text-destructive"
+              aria-live="polite"
+            >
+              {issueUrlError}
+            </span>
+          ) : null}
         </label>
 
         <div className="rounded-lg border bg-muted/25">
