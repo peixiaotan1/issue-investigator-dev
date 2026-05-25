@@ -15,6 +15,8 @@ import type { Octokit } from "@octokit/rest";
 
 export const maxDuration = 60;
 
+const INVESTIGATION_TIMEOUT_MS = 15_000;
+
 function getLastUserText(messages: UIMessage[]): string {
   const lastUserMessage = [...messages].reverse().find((msg) => msg.role === "user");
   if (!lastUserMessage) return "";
@@ -72,6 +74,41 @@ function createInputErrorReport(message: string): InvestigationReport {
     draftMaintainerComment:
       "I could not inspect the issue yet because the repository and issue number were not provided.",
   };
+}
+
+function createTimeoutReport(context: InvestigationContext): InvestigationReport {
+  const sourceRepo =
+    context.owner && context.repo ? `${context.owner}/${context.repo}` : "unknown repository";
+
+  return {
+    schemaVersion: "1.2",
+    facts: [
+      {
+        text: `Investigation timed out after ${INVESTIGATION_TIMEOUT_MS / 1000} seconds while reading GitHub data for ${sourceRepo}.`,
+        sourceType: "api_error",
+        sourceLabel: "GitHub API timeout",
+        sourceUrl: context.issueUrl ?? "",
+      },
+    ],
+    whatToDo: [
+      "Retry the investigation; transient GitHub or hosting network delays can clear on the next request.",
+      "Confirm the signed-in GitHub account still has read access to the target repository.",
+    ],
+    draftMaintainerComment:
+      "I could not complete the repository inspection because GitHub data did not return before the request timed out.",
+  };
+}
+
+function withInvestigationTimeout(
+  investigation: Promise<InvestigationReport>,
+  context: InvestigationContext,
+) {
+  return Promise.race([
+    investigation,
+    new Promise<InvestigationReport>((resolve) => {
+      setTimeout(() => resolve(createTimeoutReport(context)), INVESTIGATION_TIMEOUT_MS);
+    }),
+  ]);
 }
 
 async function runDeterministicInvestigation(
@@ -254,7 +291,10 @@ export async function POST(request: Request) {
   const lastUserText = getLastUserText(messages);
   const context = extractContextFromUserMessage(lastUserText);
   const octokit = createGitHubClient(session.accessToken);
-  const report = await runDeterministicInvestigation(octokit, context);
+  const report = await withInvestigationTimeout(
+    runDeterministicInvestigation(octokit, context),
+    context,
+  );
 
   return createReportStreamResponse(report);
 }
