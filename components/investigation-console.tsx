@@ -180,6 +180,7 @@ export function InvestigationConsole() {
   );
   const draftComment =
     reportResult.state === "valid" ? reportResult.report.draftMaintainerComment : "";
+  const isInvestigating = status === "submitted" || status === "streaming";
 
   async function copyDraftComment() {
     if (!draftComment) return;
@@ -309,8 +310,8 @@ export function InvestigationConsole() {
           ) : null}
         </div>
 
-        <Button type="submit" size="lg" className="w-full" disabled={status === "streaming"}>
-          {status === "streaming" ? "Investigating..." : "Start Investigation"}
+        <Button type="submit" size="lg" className="w-full" disabled={isInvestigating}>
+          {isInvestigating ? "Investigating..." : "Start Investigation"}
         </Button>
 
         {error ? (
